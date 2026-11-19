@@ -20,7 +20,12 @@ export const resolveImageUrl = (url) => {
     return 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=700&auto=format&fit=crop';
   }
   if (url.startsWith('/uploads/')) {
-    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+    const configured = import.meta.env.VITE_API_URL?.trim().replace(/\/+$/, '');
+    const apiBase =
+      configured ||
+      (typeof window !== 'undefined' && window.location.hostname === 'door-delight-1.onrender.com'
+        ? 'https://door-delight.onrender.com/api'
+        : 'http://localhost:8000/api');
     const hostBase = apiBase.replace(/\/api\/?$/, '');
     return `${hostBase}${url}`;
   }

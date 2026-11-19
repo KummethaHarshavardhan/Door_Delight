@@ -1,6 +1,17 @@
 import { useEffect, useRef } from 'react';
 
-const WS_BASE_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws';
+const resolveWsBaseUrl = () => {
+  const configured = import.meta.env.VITE_WS_URL?.trim().replace(/\/+$/, '');
+  if (configured) {
+    return configured.endsWith('/ws') ? configured : `${configured}/ws`;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname === 'door-delight-1.onrender.com') {
+    return 'wss://door-delight.onrender.com/ws';
+  }
+  return 'ws://localhost:8000/ws';
+};
+
+const WS_BASE_URL = resolveWsBaseUrl();
 
 export function useOrderWebSocket({ orderId = null, enabled = true, onMessage }) {
   const onMessageRef = useRef(onMessage);

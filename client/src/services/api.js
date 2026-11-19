@@ -1,6 +1,17 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const resolveApiBaseUrl = () => {
+  const configured = import.meta.env.VITE_API_URL?.trim().replace(/\/+$/, '');
+  if (configured) {
+    return configured.endsWith('/api') ? configured : `${configured}/api`;
+  }
+  if (typeof window !== 'undefined' && window.location.hostname === 'door-delight-1.onrender.com') {
+    return 'https://door-delight.onrender.com/api';
+  }
+  return 'http://localhost:8000/api';
+};
+
+export const API_BASE_URL = resolveApiBaseUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,

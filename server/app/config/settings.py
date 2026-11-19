@@ -38,6 +38,7 @@ class Settings(BaseSettings):
 
     # CORS / URLs
     CLIENT_URL: str = "http://localhost:5173"
+    CORS_ORIGINS: str = ""
     BACKEND_URL: str = "http://localhost:8000"
 
     # Upload & Private KYC storage directories
@@ -63,13 +64,17 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins(self) -> List[str]:
+        extra = [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()] if self.CORS_ORIGINS else []
         origins = [
             self.CLIENT_URL,
+            *extra,
+            "https://door-delight-1.onrender.com",
             "http://localhost:5173",
             "http://127.0.0.1:5173",
             "http://localhost:3000",
         ]
-        return list(dict.fromkeys([o for o in origins if o]))
+        cleaned = [o.strip().rstrip("/") for o in origins if o and o.strip() and o.strip() != "*"]
+        return list(dict.fromkeys(cleaned))
 
 
 @lru_cache()
