@@ -1,0 +1,71 @@
+services:
+  mongodb:
+    image: mongo:7.0
+    container_name: doordelight-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - doordelight-net
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: doordelight-server
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.5-flash}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./server:/app
+      - uploads_data:/app/uploads
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - doordelight-net
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: doordelight-client
+    restart: unless-stopped
+    environment:
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:8000/api}
+      - VITE_WS_URL=${VITE_WS_URL:-ws://localhost:8000/ws}
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client:/app
+      - /app/node_modules
+    depends_on:
+      server:
+        condition: service_healthy
+    networks:
+      - doordelight-net
+
+volumes:
+  mongodb_data:
+  uploads_data:
+
+networks:
+  doordelight-net:
+    driver: bridge
