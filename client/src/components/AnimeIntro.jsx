@@ -23,11 +23,16 @@ export default function AnimeIntro({ onComplete }) {
   const rafRef = useRef(null);
   const startTimeRef = useRef(performance.now());
   const completedRef = useRef(false);
+  const unlockCleanupRef = useRef(null);
 
   const stopAllAudio = useCallback(() => {
     if (rafRef.current) {
       cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
+    }
+    if (unlockCleanupRef.current) {
+      unlockCleanupRef.current();
+      unlockCleanupRef.current = null;
     }
     [musicRef.current, voiceRef.current].forEach((audio) => {
       if (audio) {
@@ -68,8 +73,44 @@ export default function AnimeIntro({ onComplete }) {
     musicRef.current = music;
     voiceRef.current = voice;
 
-    // Attempt autoplay with sound immediately; no sound-selection or mute UI
-    music.play().catch(() => {});
+    // Attempt autoplay immediately; if browser blocks autoplay before user interaction,
+    // unlock playback on the first permitted pointer/key gesture without adding extra UI.
+    const tryStartMusic = () => {
+      if (completedRef.current || !musicRef.current) return;
+      const currentIntroSec = Math.max(0, (performance.now() - startTimeRef.current) / 1000);
+      if (currentIntroSec >= TOTAL_INTRO_DURATION) return;
+      if (musicRef.current.paused) {
+        if (Number.isFinite(musicRef.current.duration) && currentIntroSec < musicRef.current.duration) {
+          musicRef.current.currentTime = currentIntroSec;
+        }
+        musicRef.current.play().then(() => {
+          if (unlockCleanupRef.current) {
+            unlockCleanupRef.current();
+            unlockCleanupRef.current = null;
+          }
+        }).catch(() => {
+          if (!unlockCleanupRef.current && !completedRef.current) {
+            const onFirstInteraction = () => {
+              // Prime voice element within the same user gesture so 37s voice reveal is permitted
+              if (voiceRef.current && !voicePlayedRef.current) {
+                voiceRef.current.load();
+              }
+              tryStartMusic();
+            };
+            window.addEventListener('pointerdown', onFirstInteraction, { passive: true, once: true });
+            window.addEventListener('touchstart', onFirstInteraction, { passive: true, once: true });
+            window.addEventListener('keydown', onFirstInteraction, { passive: true, once: true });
+            unlockCleanupRef.current = () => {
+              window.removeEventListener('pointerdown', onFirstInteraction);
+              window.removeEventListener('touchstart', onFirstInteraction);
+              window.removeEventListener('keydown', onFirstInteraction);
+            };
+          }
+        });
+      }
+    };
+
+    tryStartMusic();
 
     startTimeRef.current = performance.now();
 
