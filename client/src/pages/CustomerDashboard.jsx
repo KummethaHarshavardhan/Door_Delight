@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight, Flame, MapPin, Search, Sparkles, UtensilsCrossed, Zap } from 'lucide-react';
 import { aiAPI, catalogAPI, orderAPI } from '../services/api';
 import { useCart } from '../context/CartContext';
@@ -33,6 +33,18 @@ export default function CustomerDashboard() {
   const [loading, setLoading] = useState(true);
   const [replacePrompt, setReplacePrompt] = useState(null);
   const [inspectFood, setInspectFood] = useState(null);
+  const searchInputRef = useRef(null);
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const focusSearch = queryParams.get('focus') === 'search';
+  const showFavoritesOnly = queryParams.get('tab') === 'favorites';
+
+  useEffect(() => {
+    if (focusSearch && searchInputRef.current) {
+      searchInputRef.current.focus();
+      searchInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [focusSearch]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -132,6 +144,7 @@ export default function CustomerDashboard() {
                 style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)' }}
               />
               <input
+                ref={searchInputRef}
                 className="input"
                 style={{ paddingLeft: 42, borderRadius: 14, boxShadow: '0 12px 28px rgba(0,0,0,0.22)' }}
                 placeholder="Search restaurants, biryanis, pizzas..."

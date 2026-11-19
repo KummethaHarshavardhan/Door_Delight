@@ -15,6 +15,20 @@ export default function DeliveryLayout() {
 
   return (
     <div className="dash-shell">
+      <header className="mobile-only-header">
+        <div className="brand">
+          <span className="brand-badge">
+            <Bike size={18} />
+          </span>
+          <span>Rider Portal</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <ThemeToggle />
+          <button type="button" className="btn btn-secondary btn-sm" onClick={handleLogout} aria-label="Logout">
+            <LogOut size={15} />
+          </button>
+        </div>
+      </header>
       <aside className="dash-sidebar">
         <div className="brand">
           <span className="brand-badge">
@@ -53,6 +67,28 @@ export default function DeliveryLayout() {
       <main className="dash-main">
         <Outlet />
       </main>
+      <nav className="mobile-bottom-nav" aria-label="Delivery partner mobile navigation">
+        <NavLink to="/delivery" end className={({ isActive }) => `mobile-bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <LayoutDashboard size={19} />
+          <span>Active</span>
+        </NavLink>
+        <NavLink to="/delivery/earnings" className={({ isActive }) => `mobile-bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <DollarSign size={19} />
+          <span>Earnings</span>
+        </NavLink>
+        <NavLink to="/delivery/cod-settlement" className={({ isActive }) => `mobile-bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <Banknote size={19} />
+          <span>COD</span>
+        </NavLink>
+        <NavLink to="/delivery/kyc" className={({ isActive }) => `mobile-bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <FileCheck2 size={19} />
+          <span>KYC</span>
+        </NavLink>
+        <NavLink to="/delivery/profile" className={({ isActive }) => `mobile-bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <User size={19} />
+          <span>Profile</span>
+        </NavLink>
+      </nav>
     </div>
   );
 }

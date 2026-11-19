@@ -15,6 +15,20 @@ export default function ManagerLayout() {
 
   return (
     <div className="dash-shell">
+      <header className="mobile-only-header">
+        <div className="brand">
+          <span className="brand-badge">
+            <UtensilsCrossed size={18} />
+          </span>
+          <span>Partner Hub</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <ThemeToggle />
+          <button type="button" className="btn btn-secondary btn-sm" onClick={handleLogout} aria-label="Logout">
+            <LogOut size={15} />
+          </button>
+        </div>
+      </header>
       <aside className="dash-sidebar">
         <div className="brand">
           <span className="brand-badge">
@@ -50,6 +64,28 @@ export default function ManagerLayout() {
       <main className="dash-main">
         <Outlet />
       </main>
+      <nav className="mobile-bottom-nav" aria-label="Restaurant manager mobile navigation">
+        <NavLink to="/manager" end className={({ isActive }) => `mobile-bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <LayoutDashboard size={19} />
+          <span>Home</span>
+        </NavLink>
+        <NavLink to="/manager/orders" className={({ isActive }) => `mobile-bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <ClipboardList size={19} />
+          <span>Orders</span>
+        </NavLink>
+        <NavLink to="/manager/menu" className={({ isActive }) => `mobile-bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <Utensils size={19} />
+          <span>Menu</span>
+        </NavLink>
+        <NavLink to="/manager/cod-settlements" className={({ isActive }) => `mobile-bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <Banknote size={19} />
+          <span>COD</span>
+        </NavLink>
+        <NavLink to="/manager/settings" className={({ isActive }) => `mobile-bottom-nav-item ${isActive ? 'active' : ''}`}>
+          <Settings size={19} />
+          <span>Info</span>
+        </NavLink>
+      </nav>
     </div>
   );
 }
