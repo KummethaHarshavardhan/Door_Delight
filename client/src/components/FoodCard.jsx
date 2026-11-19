@@ -105,17 +105,18 @@ export default function FoodCard({ food, onAddToCart, onInspect }) {
           {food.description || 'Freshly prepared to order with authentic ingredients.'}
         </p>
 
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginTop: 14,
-            paddingTop: 12,
-            borderTop: '1px solid var(--border)',
-            gap: 8,
-          }}
-        >
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              marginTop: 14,
+              paddingTop: 12,
+              borderTop: '1px solid var(--border)',
+              gap: 8,
+            }}
+          >
           <span style={{ fontSize: '1.1rem', fontWeight: 800, letterSpacing: '-0.02em' }}>
             {formatCurrency(food.price)}
           </span>

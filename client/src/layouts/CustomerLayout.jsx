@@ -6,6 +6,7 @@ import { useCart } from '../context/CartContext';
 import AIChatWidget from '../components/AIChatWidget';
 import FlyToCartOverlay from '../components/FlyToCartOverlay';
 import ThemeToggle from '../components/ThemeToggle';
+import { formatCurrency } from '../utils/formatters';
 
 export default function CustomerLayout() {
   const { user, logout } = useAuth();
@@ -16,6 +17,10 @@ export default function CustomerLayout() {
   const isSearchTab = location.pathname === '/customer' && searchParams.get('focus') === 'search';
   const isFavTab = location.pathname === '/customer' && searchParams.get('tab') === 'favorites';
   const isHomeTab = location.pathname === '/customer' && !isSearchTab && !isFavTab;
+  const isCartOrCheckout =
+    location.pathname.startsWith('/customer/cart') ||
+    location.pathname.startsWith('/customer/checkout');
+  const showFloatingCart = (cart.item_count || 0) > 0 && !isCartOrCheckout;
 
   const handleLogout = () => {
     logout();
@@ -74,9 +79,29 @@ export default function CustomerLayout() {
         </div>
       </header>
 
-      <main className="container" style={{ flex: 1, paddingTop: 18, paddingBottom: 64 }}>
+      <main
+        className={`container ${showFloatingCart ? 'has-floating-cart' : ''}`}
+        style={{ flex: 1, paddingTop: 18, paddingBottom: 64 }}
+      >
         <Outlet />
       </main>
+
+      {/* Swiggy/Zomato-style Sticky Floating View Cart Bar (Mobile only) */}
+      {showFloatingCart && (
+        <NavLink to="/customer/cart" className="mobile-floating-cart" aria-label="View Cart">
+          <div>
+            <div style={{ fontSize: '0.78rem', opacity: 0.92 }}>
+              {cart.item_count} {cart.item_count === 1 ? 'item' : 'items'} in cart
+            </div>
+            <div style={{ fontSize: '0.98rem', fontWeight: 800 }}>
+              {formatCurrency(cart.total_amount || cart.subtotal || 0)}
+            </div>
+          </div>
+          <span className="mobile-floating-cart-cta">
+            <ShoppingCart size={16} /> View Cart
+          </span>
+        </NavLink>
+      )}
 
       {/* Swiggy/Zomato-style Fixed Mobile Bottom Navigation */}
       <nav className="mobile-bottom-nav" aria-label="Customer mobile navigation">
