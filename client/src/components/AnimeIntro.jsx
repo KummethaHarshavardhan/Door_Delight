@@ -90,21 +90,37 @@ export default function AnimeIntro({ onComplete }) {
           }
         }).catch(() => {
           if (!unlockCleanupRef.current && !completedRef.current) {
+            let gestureHandled = false;
+            const cleanupListeners = () => {
+              window.removeEventListener('pointerdown', onFirstInteraction);
+              window.removeEventListener('touchstart', onFirstInteraction);
+              window.removeEventListener('click', onFirstInteraction);
+              window.removeEventListener('keydown', onFirstInteraction);
+            };
             const onFirstInteraction = () => {
-              // Prime voice element within the same user gesture so 37s voice reveal is permitted
+              if (gestureHandled || completedRef.current) return;
+              gestureHandled = true;
+              cleanupListeners();
+              unlockCleanupRef.current = null;
+              // Synchronously unlock voice element inside user gesture for iOS Safari / Android Chrome
               if (voiceRef.current && !voicePlayedRef.current) {
-                voiceRef.current.load();
+                const v = voiceRef.current;
+                v.muted = true;
+                v.play().then(() => {
+                  v.pause();
+                  v.currentTime = 0;
+                  v.muted = false;
+                }).catch(() => {
+                  v.muted = false;
+                });
               }
               tryStartMusic();
             };
-            window.addEventListener('pointerdown', onFirstInteraction, { passive: true, once: true });
-            window.addEventListener('touchstart', onFirstInteraction, { passive: true, once: true });
-            window.addEventListener('keydown', onFirstInteraction, { passive: true, once: true });
-            unlockCleanupRef.current = () => {
-              window.removeEventListener('pointerdown', onFirstInteraction);
-              window.removeEventListener('touchstart', onFirstInteraction);
-              window.removeEventListener('keydown', onFirstInteraction);
-            };
+            window.addEventListener('pointerdown', onFirstInteraction, { passive: true });
+            window.addEventListener('touchstart', onFirstInteraction, { passive: true });
+            window.addEventListener('click', onFirstInteraction, { passive: true });
+            window.addEventListener('keydown', onFirstInteraction, { passive: true });
+            unlockCleanupRef.current = cleanupListeners;
           }
         });
       }

@@ -161,3 +161,49 @@
     animation: none !important;
   }
 }
+
+/* Mobile-only stabilization: prevent CSS transition fighting rAF, 3D flicker, and viewport overflow */
+@media (max-width: 768px) {
+  .intro-cinema-root {
+    height: 100dvh;
+    width: 100%;
+    overscroll-behavior: none;
+    touch-action: none;
+  }
+
+  .intro-scene-stage {
+    perspective: 900px;
+  }
+
+  .intro-scene-stage > div,
+  .intro-scene-stage img {
+    transition: none !important;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .intro-hud-top {
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    gap: 8px;
+  }
+
+  .intro-scene-pill {
+    font-size: 0.68rem;
+    padding: 5px 10px;
+    backdrop-filter: blur(6px);
+    max-width: 58vw;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .intro-caption-bar {
+    bottom: 20px;
+    left: 14px;
+    right: 14px;
+    max-width: calc(100% - 28px);
+  }
+}
